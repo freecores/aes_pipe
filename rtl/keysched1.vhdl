@@ -1,7 +1,5 @@
 ----------------------------------------------------------------------
 ----                                                              ----
----- Copyright (C) 2001, 2002 Authors                             ----
-----                                                              ----
 ---- This source file may be used and distributed without         ----
 ---- restriction provided that this copyright statement is not    ----
 ---- removed from the file and that any derivative work contains  ----
