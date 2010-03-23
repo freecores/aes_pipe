@@ -29,7 +29,7 @@
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
--- Description: The Datapath
+-- Description: The Overall Core
 -- Ports:
 --			clk: System Clock
 --			plaintext: Input Plaintext Blocks three at a time
