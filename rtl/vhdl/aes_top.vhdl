@@ -19,7 +19,7 @@
 ----                                                              ----
 ---- You should have received a copy of the GNU Lesser General    ----
 ---- Public License along with this source; if not, download it   ----
----- from http:--www.opencores.org/lgpl.shtml                     ----
+---- from http://www.opencores.org/lgpl.shtml                     ----
 ----                                                              ----
 ----------------------------------------------------------------------
 ------------------------------------------------------
@@ -31,10 +31,10 @@
 --
 -- Description: The Overall Core
 -- Ports:
---			clk: System Clock
---			plaintext: Input Plaintext Blocks three at a time
---			keyblock: Input Key Blocks three at a time
---			ciphertext: Output Cipher Block
+--			clk_i: System Clock
+--			plaintext_i: Input plaintext blocks
+--			keyblock_i: Input keyblock
+--			ciphertext_o: Output Cipher Block
 ------------------------------------------------------
 
 library IEEE;
@@ -45,17 +45,16 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.aes_pkg.all;
 
-entity aes_proc is
+entity aes_top is
 port(
-	clk: in std_logic;
-	plaintext: in datablock;
-	keyblock: in datablock;
-	ciphertext: out datablock
+	clk_i: in std_logic;
+	plaintext_i: in datablock;
+	keyblock_i: in datablock;
+	ciphertext_o: out datablock
 	);
-end aes_proc;
+end aes_top;
 
-architecture rtl of aes_proc is
-constant rcon: rconarr := (X"36", X"1b", X"80", X"40", X"20", X"10", X"08", X"04", X"02", X"01");
+architecture rtl of aes_top is
 signal fc3, c0, c1, c2, c3: colnet(9 downto 0);
 signal textnet_a_s, textnet_s_m, textnet_m_a: datanet(9 downto 0);
 signal key_m, key_s: datanet(9 downto 0);
@@ -98,8 +97,8 @@ port(
 	);
 end component;
 begin
-	key_m(0) <= keyblock;
-	textnet_m_a(0) <= plaintext;
+	key_m(0) <= keyblock_i;
+	textnet_m_a(0) <= plaintext_i;
 	-------------------------------------------------------
 	-- Instead of the conventional order of
 	-- Addkey -> (Sbox -> Mixcol -> Addkey) ... 9 times
@@ -109,7 +108,7 @@ begin
 	-------------------------------------------------------
 	proc: for i in 8 downto 0 generate
 		add: addkey port map(
-							clk => clk,
+							clk => clk_i,
 							roundkey => key_m(i),
 							datain => textnet_m_a(i),
 							rcon => rcon(i),
@@ -121,7 +120,7 @@ begin
 							c3 => c3(i)
 							);
 		sbox: sboxshr port map(
-							  clk => clk,
+							  clk => clk_i,
 							  blockin => textnet_a_s(i),
 							  fc3 => fc3(i),
 							  c0 => c0(i),
@@ -132,7 +131,7 @@ begin
 							  blockout => textnet_s_m(i)
 							  );
 		mix: colmix port map(
-							clk => clk,
+							clk => clk_i,
 							datain => textnet_s_m(i),
 							inrkey => key_s(i),
 							outrkey => key_m(i+1),
@@ -140,7 +139,7 @@ begin
 							);
 	end generate;
 	add_f_1: addkey port map(
-							clk => clk,
+							clk => clk_i,
 							roundkey => key_m(9),
 							datain => textnet_m_a(9),
 							rcon => rcon(9),
@@ -152,7 +151,7 @@ begin
 							c3 => c3(9)
 							);
 	sbox_f_1: sboxshr port map(
-							  clk => clk,
+							  clk => clk_i,
 							  blockin => textnet_a_s(9),
 							  fc3 => fc3(9),
 							  c0 => c0(9),
@@ -163,10 +162,10 @@ begin
 							  blockout => textnet_s_a
 							  );
 	add_f: addkey port map(
-						  clk => clk,
+						  clk => clk_i,
 						  roundkey => key_s(9),
 						  datain => textnet_s_a,
 						  rcon => X"00",
-						  dataout => ciphertext
+						  dataout => ciphertext_o
 						  );
 end rtl;

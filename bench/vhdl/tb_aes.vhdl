@@ -27,19 +27,11 @@
 -- Author: Subhasis
 -- Last Modified: 20/03/10
 -- Email: subhasis256@gmail.com
+--
+-- TODO: Test with NIST test vectors
 ------------------------------------------------------
 --
--- Description: The Sbox and Shiftrows step
--- Ports:
---			clk: System Clock
---			blockin: Input state block
---			fc3: See keysched1 for explanation
---			c0: See keysched1 for explanation
---			c1: See keysched1 for explanation
---			c2: See keysched1 for explanation
---			c3: See keysched1 for explanation
---			nextkey: Roundkey for next round
---			blockout: output state block
+-- Description: Testbench for AESFast
 ------------------------------------------------------
 
 library IEEE;
@@ -50,52 +42,64 @@ use IEEE.std_logic_unsigned.all;
 library work;
 use work.aes_pkg.all;
 
-entity sboxshr is
-port(
-	clk: in std_logic;
-	blockin: in datablock;
-	fc3: in blockcol;
-	c0: in blockcol;
-	c1: in blockcol;
-	c2: in blockcol;
-	c3: in blockcol;
-	nextkey: out datablock;
-	blockout: out datablock
-	);
-end sboxshr;
+entity tb_aes is
+end tb_aes;
 
-architecture rtl of sboxshr is
-component sbox is
+architecture rtl of tb_aes is
+signal clk: std_logic;
+signal plaintext: datablock;
+signal key: datablock;
+signal cipher: datablock;
+signal start: std_logic := '0';
+signal done: std_logic;
+
+component aes_top is
 port(
-	clk: in std_logic;
-	bytein: in std_logic_vector(7 downto 0);
-	byteout: out std_logic_vector(7 downto 0)
+	clk_i: in std_logic;
+	plaintext_i: in datablock;
+	keyblock_i: in datablock;
+	ciphertext_o: out datablock
 	);
 end component;
+
 begin
-	-- The sbox, the output going to the appropriate state byte after shiftrows
 	g0: for i in 3 downto 0 generate
-		g1: for j in 3 downto 0 generate
-			sub: sbox port map(
-							  clk => clk,
-							  bytein => blockin(i,j),
-							  byteout => blockout(i,(j-i) mod 4)
-							  );
+		g1: for j in 3 downto 1 generate
+			plaintext(i,j) <= X"00";
+			key(i,j) <= X"00";
 		end generate;
 	end generate;
-	process(clk)
+	plaintext(3,0) <= X"00";
+	plaintext(2,0) <= X"00";
+	plaintext(1,0) <= X"00";
+	key(3,0) <= X"00";
+	key(2,0) <= X"00";
+	key(1,0) <= X"00";
+	key(0,0) <= X"00";
+	proc0: aes_top port map(
+						clk_i => clk,
+						plaintext_i => plaintext,
+						keyblock_i => key,
+						ciphertext_o => cipher
+					   );
+	gen_clk: process
 	begin
-		if(rising_edge(clk)) then
-			-- col0 of nextkey = fc3 xor col0
-			-- col1 of nextkey = fc3 xor col0 xor col1
-			-- col2 of nextkey = fc3 xor col0 xor col1 xor col2
-			-- col3 of nextkey = fc3 xor col0 xor col1 xor col2 xor col3
-			genkey: for j in 3 downto 0 loop
-				nextkey(j, 0) <= fc3(j) xor c0(j);
-				nextkey(j, 1) <= fc3(j) xor c1(j);
-				nextkey(j, 2) <= fc3(j) xor c2(j);
-				nextkey(j, 3) <= fc3(j) xor c3(j);
-			end loop;
-		end if;
+		wait for 10 ns;
+		clk <= '1';
+		wait for 10 ns;
+		clk <= '0';
+	end process;
+	
+	gen_in: process
+	begin
+		wait for 25 ns;
+		plaintext(0,0) <= X"00";
+		wait for 20 ns;
+		plaintext(0,0) <= X"01";
+		wait for 20 ns;
+		plaintext(0,0) <= X"02";
+		wait for 40 ns;
+		plaintext(0,0) <= X"03";
+		wait;
 	end process;
 end rtl;
