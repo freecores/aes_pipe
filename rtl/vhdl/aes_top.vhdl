@@ -1,8 +1,27 @@
 ----------------------------------------------------------------------
 ----                                                              ----
+---- Pipelined Aes IP Core                                        ----
+----                                                              ----
+---- This file is part of the Pipelined AES project               ----
+---- http://www.opencores.org/cores/aes_pipe/                     ----
+----                                                              ----
+---- Description                                                  ----
+---- Implementation of AES IP core according to                   ----
+---- FIPS PUB 197 specification document.                         ----
+----                                                              ----
+---- To Do:                                                       ----
+----   -                                                          ----
+----                                                              ----
+---- Author:                                                      ----
+----      - Subhasis Das, subhasis256@gmail.com                   ----
+----                                                              ----
+----------------------------------------------------------------------
+----                                                              ----
+---- Copyright (C) 2009 Authors and OPENCORES.ORG                 ----
+----                                                              ----
 ---- This source file may be used and distributed without         ----
 ---- restriction provided that this copyright statement is not    ----
----- removed from the file and that any derivative work contains  ----
+---- removed from the file and that any derivative work contains ----
 ---- the original copyright notice and the associated disclaimer. ----
 ----                                                              ----
 ---- This source file is free software; you can redistribute it   ----
@@ -14,7 +33,7 @@
 ---- This source is distributed in the hope that it will be       ----
 ---- useful, but WITHOUT ANY WARRANTY; without even the implied   ----
 ---- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ----
----- PURPOSE.  See the GNU Lesser General Public License for more ----
+---- PURPOSE. See the GNU Lesser General Public License for more ----
 ---- details.                                                     ----
 ----                                                              ----
 ---- You should have received a copy of the GNU Lesser General    ----
@@ -25,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -48,6 +67,7 @@ use work.aes_pkg.all;
 entity aes_top is
 port(
 	clk_i: in std_logic;
+	rst_i: in std_logic;
 	plaintext_i: in datablock;
 	keyblock_i: in datablock;
 	ciphertext_o: out datablock
@@ -63,6 +83,7 @@ signal textnet_s_a: datablock;
 component sboxshr is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	blockin: in datablock;
 	fc3: in blockcol;
 	c0: in blockcol;
@@ -76,6 +97,7 @@ end component;
 component colmix is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	datain: in datablock;
 	inrkey: in datablock;
 	outrkey: out datablock;
@@ -85,6 +107,7 @@ end component;
 component addkey is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	roundkey: in datablock;
 	datain: in datablock;
 	rcon: in std_logic_vector(7 downto 0);
@@ -109,6 +132,7 @@ begin
 	proc: for i in 8 downto 0 generate
 		add: addkey port map(
 							clk => clk_i,
+							rst => rst_i,
 							roundkey => key_m(i),
 							datain => textnet_m_a(i),
 							rcon => rcon(i),
@@ -121,6 +145,7 @@ begin
 							);
 		sbox: sboxshr port map(
 							  clk => clk_i,
+							  rst => rst_i,
 							  blockin => textnet_a_s(i),
 							  fc3 => fc3(i),
 							  c0 => c0(i),
@@ -132,6 +157,7 @@ begin
 							  );
 		mix: colmix port map(
 							clk => clk_i,
+							rst => rst_i,
 							datain => textnet_s_m(i),
 							inrkey => key_s(i),
 							outrkey => key_m(i+1),
@@ -140,6 +166,7 @@ begin
 	end generate;
 	add_f_1: addkey port map(
 							clk => clk_i,
+							rst => rst_i,
 							roundkey => key_m(9),
 							datain => textnet_m_a(9),
 							rcon => rcon(9),
@@ -152,6 +179,7 @@ begin
 							);
 	sbox_f_1: sboxshr port map(
 							  clk => clk_i,
+							  rst => rst_i,
 							  blockin => textnet_a_s(9),
 							  fc3 => fc3(9),
 							  c0 => c0(9),
@@ -163,6 +191,7 @@ begin
 							  );
 	add_f: addkey port map(
 						  clk => clk_i,
+						  rst => rst_i,
 						  roundkey => key_s(9),
 						  datain => textnet_s_a,
 						  rcon => X"00",

@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -72,6 +72,7 @@ use work.aes_pkg.all;
 entity sboxshr is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	blockin: in datablock;
 	fc3: in blockcol;
 	c0: in blockcol;
@@ -87,6 +88,7 @@ architecture rtl of sboxshr is
 component sbox is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	bytein: in std_logic_vector(7 downto 0);
 	byteout: out std_logic_vector(7 downto 0)
 	);
@@ -97,14 +99,17 @@ begin
 		g1: for j in 3 downto 0 generate
 			sub: sbox port map(
 							  clk => clk,
+							  rst => rst,
 							  bytein => blockin(i,j),
 							  byteout => blockout(i,(j-i) mod 4)
 							  );
 		end generate;
 	end generate;
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			nextkey <= zero_data;
+		elsif(rising_edge(clk)) then
 			-- col0 of nextkey = fc3 xor col0
 			-- col1 of nextkey = fc3 xor col0 xor col1
 			-- col2 of nextkey = fc3 xor col0 xor col1 xor col2

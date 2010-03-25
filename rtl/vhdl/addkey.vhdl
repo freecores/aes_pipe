@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -73,6 +73,7 @@ use work.aes_pkg.all;
 entity addkey is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	roundkey: in datablock;
 	datain: in datablock;
 	rcon: in std_logic_vector(7 downto 0);
@@ -89,6 +90,7 @@ architecture rtl of addkey is
 component keysched1 is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	roundkey: in datablock;
 	rcon: in std_logic_vector(7 downto 0);
 	fc3: out blockcol;
@@ -102,6 +104,7 @@ signal added: datablock;
 begin
 	step1: keysched1 port map(
 							 clk => clk,
+							 rst => rst,
 							 roundkey => roundkey,
 							 rcon => rcon,
 							 fc3 => fc3,
@@ -116,9 +119,11 @@ begin
 		end generate;
 	end generate;
 	
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			dataout <= zero_data;
+		elsif(rising_edge(clk)) then
 			dataout <= added;
 		end if;
 	end process;

@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -71,6 +71,7 @@ use work.aes_pkg.all;
 entity keysched1 is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	roundkey: in datablock;
 	rcon: in std_logic_vector(7 downto 0);
 	fc3: out blockcol;
@@ -87,6 +88,7 @@ signal key0, key1, key2, key3: std_logic_vector(7 downto 0);
 component sbox is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	bytein: in std_logic_vector(7 downto 0);
 	byteout: out std_logic_vector(7 downto 0)
 	);
@@ -95,21 +97,25 @@ signal rcon_d: std_logic_vector(7 downto 0);
 begin
 	sub0: sbox port map(
 					  clk => clk,
+					  rst => rst,
 					  bytein => roundkey(0, 3),
 					  byteout => subst(3)
 					  );
 	sub1: sbox port map(
 					  clk => clk,
+					  rst => rst,
 					  bytein => roundkey(1, 3),
 					  byteout => subst(0)
 					  );
 	sub2: sbox port map(
 					  clk => clk,
+					  rst => rst,
 					  bytein => roundkey(2, 3),
 					  byteout => subst(1)
 					  );
 	sub3: sbox port map(
 					  clk => clk,
+					  rst => rst,
 					  bytein => roundkey(3, 3),
 					  byteout => subst(2)
 					  );
@@ -117,9 +123,15 @@ begin
 	fc3(1) <= subst(1);
 	fc3(2) <= subst(2);
 	fc3(3) <= subst(3);
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			rcon_d <= X"00";
+			c0 <= zero_col;
+			c1 <= zero_col;
+			c2 <= zero_col;
+			c3 <= zero_col;
+		elsif(rising_edge(clk)) then
 			rcon_d <= rcon;
 			for j in 3 downto 0 loop
 				c0(j) <= roundkey(j, 0);

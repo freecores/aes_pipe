@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -70,6 +70,7 @@ use work.aes_pkg.all;
 entity sbox is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	bytein: in std_logic_vector(7 downto 0);
 	byteout: out std_logic_vector(7 downto 0)
 	);
@@ -97,9 +98,11 @@ X"c0", X"72", X"a4", X"9c", X"af", X"a2", X"d4", X"ad", X"f0", X"47", X"59", X"f
 X"76", X"ab", X"d7", X"fe", X"2b", X"67", X"01", X"30", X"c5", X"6f", X"6b", X"f2", X"7b", X"77", X"7c", X"63" 
 );
 begin
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			byteout <= X"00";
+		elsif(rising_edge(clk)) then
 			byteout <= sbox_ram(conv_integer(bytein));
 		end if;
 	end process;

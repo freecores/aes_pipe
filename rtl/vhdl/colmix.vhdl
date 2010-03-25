@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -69,6 +69,7 @@ use work.aes_pkg.all;
 entity colmix is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	datain: in datablock;
 	inrkey: in datablock;
 	outrkey: out datablock;
@@ -80,6 +81,7 @@ architecture rtl of colmix is
 component mixcol is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	in0: in std_logic_vector(7 downto 0);
 	in1: in std_logic_vector(7 downto 0);
 	in2: in std_logic_vector(7 downto 0);
@@ -96,6 +98,7 @@ begin
 	g0: for i in 3 downto 0 generate
 		mix: mixcol port map(
 							clk => clk,
+							rst => rst,
 							in0 => datain(0, i),
 							in1 => datain(1, i),
 							in2 => datain(2, i),
@@ -106,9 +109,11 @@ begin
 							out3 => dataout(3, i)
 							);
 	end generate;
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			outrkey <= zero_data;
+		elsif(rising_edge(clk)) then
 			outrkey <= inrkey;
 		end if;
 	end process;

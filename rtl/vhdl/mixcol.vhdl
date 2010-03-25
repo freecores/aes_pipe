@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 --
@@ -74,6 +74,7 @@ use work.aes_pkg.all;
 entity mixcol is
 port(
 	clk: in std_logic;
+	rst: in std_logic;
 	in0: in std_logic_vector(7 downto 0);
 	in1: in std_logic_vector(7 downto 0);
 	in2: in std_logic_vector(7 downto 0);
@@ -125,9 +126,14 @@ begin
 	t3 <= d3 xor in3;
 	
 	xored <= in0 xor in1 xor in2 xor in3;
-	process(clk)
+	process(clk,rst)
 	begin
-		if(rising_edge(clk)) then
+		if(rst = '1') then
+			out0 <= X"00";
+			out1 <= X"00";
+			out2 <= X"00";
+			out3 <= X"00";
+		elsif(rising_edge(clk)) then
 			out0 <= xored xor t0 xor d1;
 			out1 <= xored xor t1 xor d2;
 			out2 <= xored xor t2 xor d3;

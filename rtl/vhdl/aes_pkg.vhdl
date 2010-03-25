@@ -44,7 +44,7 @@
 ------------------------------------------------------
 -- Project: AESFast
 -- Author: Subhasis
--- Last Modified: 20/03/10
+-- Last Modified: 25/03/10
 -- Email: subhasis256@gmail.com
 ------------------------------------------------------
 -- Common library file containing common data path definitions
@@ -56,8 +56,10 @@ use IEEE.std_logic_1164.all;
 package aes_pkg is
 	-- A column of 4 bytes
 	type blockcol is array(3 downto 0) of std_logic_vector(7 downto 0);
+	constant zero_col: blockcol := (X"00", X"00", X"00", X"00");
 	-- A datablock of 16 bytes
 	type datablock is array(3 downto 0, 3 downto 0) of std_logic_vector(7 downto 0);
+	constant zero_data: datablock := ((X"00", X"00", X"00", X"00"),(X"00", X"00", X"00", X"00"), (X"00", X"00", X"00", X"00"), (X"00", X"00", X"00", X"00"));
 	-- Vector of columns
 	type colnet is array(natural range<>) of blockcol;
 	-- Vector of blocks
