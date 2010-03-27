@@ -67,7 +67,7 @@ The \texttt{trunk/rtl/vhdl} directory contains the whole source code.
 
 The sample testbench is in \texttt{trunk/bench/vhdl}.
 
-For compiling and running the testbench, the script \texttt{sim.sh} in \texttt{trunk/sim/rtl\_sim/run} directory can be used. It uses Xilinx free Isim simulator. The testbench takes in plaintext and key data from \texttt{vectors.dat} in \texttt{trunk/sim/rtl\_sim/src} directory. The expected ciphertext data should be present in \texttt{cipher.dat} in \texttt{trunk/sim/rtl\_sim/src} directory. The results are written to \texttt{output.log} in \texttt{trunk/sim/rtl\_sim/log} directory. 
+For compiling and running the testbench, the script \texttt{sim\_isim.sh} in \texttt{trunk/sim/rtl\_sim/run} directory can be used for Xilinx ISim simulator and \texttt{sim\_ghdl.sh} for GHDL. The testbench takes in plaintext and key data from \texttt{vectors.dat} in \texttt{trunk/sim/rtl\_sim/src} directory. The expected ciphertext data should be present in \texttt{cipher.dat} in \texttt{trunk/sim/rtl\_sim/src} directory. The results are written to \texttt{output.log} in \texttt{trunk/sim/rtl\_sim/log} directory. The final line is 'OK' if all tests pass, else it is 'FAIL'. This can be used to automate checkings over large test datasets.
 
 The \texttt{trunk/syn/Xilinx/run} directory contains the \texttt{synth.sh} shell script, which will synthesize the design when run using Xilinx ISE WebPack tools.
 
